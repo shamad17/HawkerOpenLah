@@ -42,6 +42,7 @@ The app also allows users to choose a different date, which makes it useful for 
 - Open a hawker centre in Google Maps
 - View nearby open alternatives using latitude and longitude
 - Use icon buttons and strong typography to make actions easier to scan
+- Use an original CSS illustration to give the app a more polished food-dashboard feel
 - Show loading, success, warning, empty, and fallback states
 - Use fallback sample data if the live API cannot be loaded
 
@@ -104,6 +105,7 @@ The CSS file controls the visual design and responsive layout:
 - Adds loading skeleton animation
 - Adds responsive layouts for tablet and mobile screens
 - Uses a refreshed colour palette and stronger typography
+- Builds the hawker stall hero illustration using HTML elements and CSS shapes
 
 The design uses high-contrast status colours:
 
@@ -232,6 +234,8 @@ The interface is designed to be direct and task-focused. Users usually arrive wi
 The status cards give a quick overview of how many centres are open, closing soon, or closed. The details panel gives deeper information only after the user selects a hawker centre, which keeps the main results list easier to scan.
 
 The updated typography makes the page easier to scan, while icon buttons make common actions such as searching, saving favourites, reloading the API, and opening maps feel clearer. The app also uses clear colour-coded labels and text labels together, so users do not need to rely only on colour.
+
+The hero section includes an original illustrated hawker stall scene created with HTML and CSS instead of copied artwork. This gives the app a more distinctive Singapore food identity while avoiding copyright issues.
 
 ## Limitations
 
