@@ -1,8 +1,18 @@
+// Hawker Open or Not
+// This file controls the whole interactive experience:
+// 1. Load official Data.gov.sg hawker closure data.
+// 2. Convert raw API records into cleaner JavaScript objects.
+// 3. Render search results, filters, details, favourites, and demo-date status.
+
 const DATASET_ID = "d_bda4baa634dd1cc7a6c7cad5f19e2d68";
 const API_URL = `https://data.gov.sg/api/action/datastore_search?resource_id=${DATASET_ID}&limit=500`;
-const STORAGE_KEY = "hawker-open-or-not-favourites";
+const FAVOURITES_KEY = "hawker-open-or-not-favourites";
+const LARGE_TEXT_KEY = "hawker-open-or-not-large-text";
 const SOON_DAYS = 14;
+const FALLBACK_IMAGE_URL = "https://www.nea.gov.sg/images/default-source/hawker-centres-division/amoy-street-food-centre.jpg";
 
+// Small sample used only when the live API cannot be reached.
+// This keeps the app usable during presentation or offline testing.
 const fallbackRecords = [
   {
     _id: 1,
@@ -53,6 +63,10 @@ const fallbackRecords = [
 const elements = {
   searchForm: document.querySelector("#searchForm"),
   searchInput: document.querySelector("#searchInput"),
+  dateInput: document.querySelector("#dateInput"),
+  resetDateButton: document.querySelector("#resetDateButton"),
+  largeTextToggle: document.querySelector("#largeTextToggle"),
+  retryButton: document.querySelector("#retryButton"),
   chips: document.querySelectorAll(".chip"),
   sortSelect: document.querySelector("#sortSelect"),
   resultsGrid: document.querySelector("#resultsGrid"),
@@ -66,22 +80,28 @@ const elements = {
 };
 
 const state = {
+  rawRecords: [],
   hawkers: [],
   selectedId: null,
   filter: "all",
   query: "",
-  favourites: loadFavourites()
+  isLoading: true,
+  dataSource: "api",
+  viewDate: startOfDay(new Date()),
+  favourites: loadFavourites(),
+  largeText: localStorage.getItem(LARGE_TEXT_KEY) === "true"
 };
-
-const today = startOfDay(new Date());
 
 document.addEventListener("DOMContentLoaded", init);
 
 async function init() {
-  elements.todayDate.textContent = formatDate(today);
+  elements.dateInput.value = toDateInputValue(state.viewDate);
+  elements.largeTextToggle.checked = state.largeText;
+  document.body.classList.toggle("large-text", state.largeText);
+
   bindEvents();
+  renderLoading();
   await loadData();
-  render();
 }
 
 function bindEvents() {
@@ -96,6 +116,38 @@ function bindEvents() {
     render();
   });
 
+  elements.dateInput.addEventListener("change", () => {
+    const nextDate = parseDateInput(elements.dateInput.value);
+    if (!nextDate) {
+      showNotice("Please choose a valid date.", "warning");
+      return;
+    }
+
+    state.viewDate = nextDate;
+    rebuildHawkers();
+    showNotice(`Showing hawker centre status for ${formatDate(state.viewDate)}.`, "success");
+    render();
+  });
+
+  elements.resetDateButton.addEventListener("click", () => {
+    state.viewDate = startOfDay(new Date());
+    elements.dateInput.value = toDateInputValue(state.viewDate);
+    rebuildHawkers();
+    showNotice("Date reset to today.", "success");
+    render();
+  });
+
+  elements.largeTextToggle.addEventListener("change", () => {
+    state.largeText = elements.largeTextToggle.checked;
+    document.body.classList.toggle("large-text", state.largeText);
+    localStorage.setItem(LARGE_TEXT_KEY, String(state.largeText));
+  });
+
+  elements.retryButton.addEventListener("click", async () => {
+    renderLoading();
+    await loadData();
+  });
+
   elements.chips.forEach((chip) => {
     chip.addEventListener("click", () => {
       state.filter = chip.dataset.filter;
@@ -108,6 +160,9 @@ function bindEvents() {
 }
 
 async function loadData() {
+  state.isLoading = true;
+  elements.retryButton.disabled = true;
+
   try {
     const response = await fetch(API_URL);
     if (!response.ok) {
@@ -120,14 +175,31 @@ async function loadData() {
       throw new Error("The Data.gov.sg response format was unexpected.");
     }
 
-    state.hawkers = records.map(normaliseHawker);
+    state.rawRecords = records;
+    state.dataSource = "api";
     showNotice(`Loaded ${records.length} hawker centres from Data.gov.sg.`, "success");
   } catch (error) {
-    state.hawkers = fallbackRecords.map(normaliseHawker);
+    state.rawRecords = fallbackRecords;
+    state.dataSource = "fallback";
     showNotice("Live data could not be loaded, so sample hawker centre data is shown for testing.", "warning");
+  } finally {
+    state.isLoading = false;
+    elements.retryButton.disabled = false;
+    rebuildHawkers();
+    render();
   }
 }
 
+function rebuildHawkers() {
+  state.hawkers = state.rawRecords.map(normaliseHawker);
+
+  if (!state.hawkers.some((hawker) => hawker.id === state.selectedId)) {
+    state.selectedId = null;
+  }
+}
+
+// Data.gov.sg records have many field names from the original dataset.
+// This function turns each record into a simpler object that the UI can use.
 function normaliseHawker(record) {
   const closures = [
     buildClosure(record.q1_cleaningstartdate, record.q1_cleaningenddate, record.remarks_q1, "Q1 cleaning"),
@@ -139,9 +211,9 @@ function normaliseHawker(record) {
 
   closures.sort((a, b) => a.start - b.start);
 
-  const nextClosure = closures.find((closure) => closure.end >= today) || null;
-  const isClosed = closures.some((closure) => today >= closure.start && today <= closure.end);
-  const closingSoon = Boolean(nextClosure && !isClosed && daysBetween(today, nextClosure.start) <= SOON_DAYS);
+  const nextClosure = closures.find((closure) => closure.end >= state.viewDate) || null;
+  const isClosed = closures.some((closure) => state.viewDate >= closure.start && state.viewDate <= closure.end);
+  const closingSoon = Boolean(nextClosure && !isClosed && daysBetween(state.viewDate, nextClosure.start) <= SOON_DAYS);
 
   return {
     id: String(record._id || record.serial_no || record.name),
@@ -176,8 +248,31 @@ function buildClosure(startValue, endValue, remarks, label) {
   };
 }
 
+function renderLoading() {
+  state.isLoading = true;
+  elements.todayDate.textContent = formatDate(state.viewDate);
+  elements.resultSummary.textContent = "Loading hawker centre data...";
+  elements.resultsGrid.innerHTML = `
+    <article class="card skeleton-card">
+      <div class="skeleton-line wide"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line short"></div>
+    </article>
+    <article class="card skeleton-card">
+      <div class="skeleton-line wide"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line short"></div>
+    </article>
+  `;
+}
+
 function render() {
+  if (state.isLoading) {
+    return;
+  }
+
   const filtered = getVisibleHawkers();
+  elements.todayDate.textContent = formatDate(state.viewDate);
   updateStats();
   renderResults(filtered);
   renderDetails();
@@ -212,13 +307,14 @@ function getVisibleHawkers() {
 }
 
 function renderResults(hawkers) {
-  elements.resultSummary.textContent = `${hawkers.length} hawker centre${hawkers.length === 1 ? "" : "s"} shown`;
+  const sourceLabel = state.dataSource === "api" ? "live API" : "sample data";
+  elements.resultSummary.textContent = `${hawkers.length} hawker centre${hawkers.length === 1 ? "" : "s"} shown using ${sourceLabel}`;
 
   if (hawkers.length === 0) {
     elements.resultsGrid.innerHTML = `
-      <article class="card">
+      <article class="card empty-card">
         <h2>No hawker centres found</h2>
-        <p class="meta">Try another search term or switch back to the All filter.</p>
+        <p class="meta">Try another search term, choose another date, or switch back to the All filter.</p>
       </article>
     `;
     return;
@@ -232,12 +328,12 @@ function renderResults(hawkers) {
       </div>
       <p class="meta">
         <span>${escapeHtml(hawker.address || "Address unavailable")}</span>
-        <span>${getNextClosureText(hawker)}</span>
-        <span>${hawker.foodStalls} food stalls · ${hawker.marketStalls} market stalls</span>
+        <span>${escapeHtml(getNextClosureText(hawker))}</span>
+        <span>${hawker.foodStalls} food stalls / ${hawker.marketStalls} market stalls</span>
       </p>
       <div class="card-actions">
-        <button type="button" class="primary" data-select-id="${hawker.id}">View details</button>
-        <button type="button" data-favourite-id="${hawker.id}">
+        <button type="button" class="primary" data-select-id="${escapeAttribute(hawker.id)}">View details</button>
+        <button type="button" data-favourite-id="${escapeAttribute(hawker.id)}">
           ${state.favourites.includes(hawker.id) ? "Saved" : "Save"}
         </button>
       </div>
@@ -271,7 +367,7 @@ function renderDetails() {
 
   const alternatives = getNearbyAlternatives(hawker);
   const mapUrl = getSafeUrl(hawker.mapUrl) || `https://www.google.com/maps/search/?api=1&query=${hawker.latitude},${hawker.longitude}`;
-  const photoUrl = getSafeUrl(hawker.photoUrl) || "https://www.nea.gov.sg/images/default-source/hawker-centres-division/amoy-street-food-centre.jpg";
+  const photoUrl = getSafeUrl(hawker.photoUrl) || FALLBACK_IMAGE_URL;
 
   elements.detailsPanel.innerHTML = `
     <img class="details-image" src="${photoUrl}" alt="${escapeAttribute(hawker.name)}" loading="lazy">
@@ -279,8 +375,10 @@ function renderDetails() {
       <div class="details-title-row">
         <span class="badge ${hawker.status}">${getStatusLabel(hawker)}</span>
         <h2>${escapeHtml(hawker.name)}</h2>
-        <p class="meta">${escapeHtml(hawker.address)}</p>
+        <p class="meta">${escapeHtml(hawker.address || "Address unavailable")}</p>
       </div>
+
+      <p class="status-note">${escapeHtml(getStatusExplanation(hawker))}</p>
 
       <div class="details-actions">
         <a href="${mapUrl}" target="_blank" rel="noreferrer">Open map</a>
@@ -301,7 +399,7 @@ function renderDetails() {
       </div>
 
       <section>
-        <h2>Closure dates</h2>
+        <h2>Cleaning closure dates</h2>
         <ul class="date-list">
           ${renderClosureDates(hawker)}
         </ul>
@@ -313,18 +411,18 @@ function renderDetails() {
       </section>
 
       <section>
-        <h2>Nearby alternatives</h2>
+        <h2>Nearby open alternatives</h2>
         <ul class="alt-list">
-          ${alternatives.map((item) => `
-            <li>
-              <strong>${escapeHtml(item.name)}</strong>
-              <span class="meta">${item.distance.toFixed(1)} km away · ${getStatusLabel(item)}</span>
-            </li>
-          `).join("")}
+          ${renderAlternatives(alternatives)}
         </ul>
       </section>
     </div>
   `;
+
+  const image = elements.detailsPanel.querySelector(".details-image");
+  image.addEventListener("error", () => {
+    image.src = FALLBACK_IMAGE_URL;
+  }, { once: true });
 
   document.querySelector("#detailFavouriteButton").addEventListener("click", () => toggleFavourite(hawker.id));
 }
@@ -335,9 +433,22 @@ function renderClosureDates(hawker) {
   }
 
   return hawker.closures.map((closure) => `
-    <li class="date-item">
+    <li class="date-item ${isActiveClosure(closure) ? "active-date" : ""}">
       <strong>${closure.label}: ${formatDateRange(closure.start, closure.end)}</strong>
-      <span>${getClosureState(closure)}${closure.remarks ? ` · ${escapeHtml(closure.remarks)}` : ""}</span>
+      <span>${getClosureState(closure)}${closure.remarks ? ` / ${escapeHtml(closure.remarks)}` : ""}</span>
+    </li>
+  `).join("");
+}
+
+function renderAlternatives(alternatives) {
+  if (alternatives.length === 0) {
+    return `<li>No nearby open alternatives found in the current dataset.</li>`;
+  }
+
+  return alternatives.map((item) => `
+    <li>
+      <strong>${escapeHtml(item.name)}</strong>
+      <span class="meta">${item.distance.toFixed(1)} km away / ${getStatusLabel(item)}</span>
     </li>
   `).join("");
 }
@@ -354,16 +465,22 @@ function updateStats() {
 }
 
 function toggleFavourite(id) {
+  const hawker = state.hawkers.find((item) => item.id === id);
+
   if (state.favourites.includes(id)) {
     state.favourites = state.favourites.filter((item) => item !== id);
+    showNotice(`${hawker?.name || "Hawker centre"} removed from favourites.`, "success");
   } else {
     state.favourites = [...state.favourites, id];
+    showNotice(`${hawker?.name || "Hawker centre"} saved to favourites.`, "success");
   }
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.favourites));
+  localStorage.setItem(FAVOURITES_KEY, JSON.stringify(state.favourites));
   render();
 }
 
+// Haversine formula: calculates straight-line distance between two coordinates.
+// It is enough for suggesting nearby alternatives without a full maps API.
 function getNearbyAlternatives(selected) {
   if (!Number.isFinite(selected.latitude) || !Number.isFinite(selected.longitude)) {
     return [];
@@ -396,6 +513,27 @@ function parseSingaporeDate(value) {
   }
 
   return startOfDay(new Date(year, month - 1, day));
+}
+
+function parseDateInput(value) {
+  if (!value) {
+    return null;
+  }
+
+  const [year, month, day] = value.split("-").map(Number);
+  if (!year || !month || !day) {
+    return null;
+  }
+
+  return startOfDay(new Date(year, month - 1, day));
+}
+
+function toDateInputValue(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
 
 function startOfDay(date) {
@@ -434,6 +572,18 @@ function getStatusLabel(hawker) {
   return "Open today";
 }
 
+function getStatusExplanation(hawker) {
+  if (hawker.status === "closed") {
+    return `This centre is listed as closed for cleaning on ${formatDate(state.viewDate)}.`;
+  }
+
+  if (hawker.status === "soon") {
+    return `This centre is open on ${formatDate(state.viewDate)}, but its next cleaning closure is within ${SOON_DAYS} days.`;
+  }
+
+  return `This centre is not listed as closed on ${formatDate(state.viewDate)}.`;
+}
+
 function getNextClosureText(hawker) {
   if (!hawker.nextClosure) {
     return "No upcoming closure listed";
@@ -443,15 +593,19 @@ function getNextClosureText(hawker) {
 }
 
 function getClosureState(closure) {
-  if (today >= closure.start && today <= closure.end) {
-    return "Happening today";
+  if (isActiveClosure(closure)) {
+    return "Happening on selected date";
   }
 
-  if (closure.end < today) {
+  if (closure.end < state.viewDate) {
     return "Completed";
   }
 
-  return `Starts in ${daysBetween(today, closure.start)} day${daysBetween(today, closure.start) === 1 ? "" : "s"}`;
+  return `Starts in ${daysBetween(state.viewDate, closure.start)} day${daysBetween(state.viewDate, closure.start) === 1 ? "" : "s"}`;
+}
+
+function isActiveClosure(closure) {
+  return state.viewDate >= closure.start && state.viewDate <= closure.end;
 }
 
 function cleanText(value) {
@@ -466,7 +620,7 @@ function toNumber(value) {
 function upgradeImageUrl(url) {
   const value = cleanText(url);
   if (!value || value === "nil") {
-    return "https://www.nea.gov.sg/images/default-source/hawker-centres-division/amoy-street-food-centre.jpg";
+    return FALLBACK_IMAGE_URL;
   }
 
   return value.replace("http://", "https://");
@@ -481,6 +635,8 @@ function getSafeUrl(value) {
   }
 }
 
+// The API is trusted public data, but escaping text before rendering is still
+// good practice because it prevents accidental HTML injection.
 function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -502,7 +658,7 @@ function showNotice(message, type) {
 
 function loadFavourites() {
   try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    const saved = JSON.parse(localStorage.getItem(FAVOURITES_KEY));
     return Array.isArray(saved) ? saved : [];
   } catch (error) {
     return [];

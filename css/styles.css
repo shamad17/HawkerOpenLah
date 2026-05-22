@@ -43,6 +43,23 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid #fbbf24;
+  outline-offset: 3px;
+}
+
+body.large-text {
+  font-size: 1.12rem;
+}
+
 .app-header {
   background:
     linear-gradient(90deg, rgba(7, 79, 74, 0.92), rgba(194, 65, 12, 0.72)),
@@ -144,7 +161,8 @@ h1 {
 }
 
 .search-row input,
-.toolbar select {
+.toolbar select,
+.demo-controls input {
   border: 1px solid var(--line);
   min-height: 46px;
   padding: 0 12px;
@@ -153,6 +171,8 @@ h1 {
 .search-row button,
 .chip,
 .card button,
+.toolbar-actions button,
+.demo-controls button,
 .details-actions a,
 .details-actions button {
   border: 0;
@@ -164,6 +184,44 @@ h1 {
   background: var(--brand);
   color: white;
   font-weight: 800;
+}
+
+.demo-controls {
+  align-items: end;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  margin-top: 14px;
+}
+
+.demo-controls label {
+  margin: 0;
+}
+
+.demo-controls input[type="date"] {
+  display: block;
+  margin-top: 6px;
+  width: 100%;
+}
+
+.demo-controls button {
+  background: var(--accent);
+  color: white;
+  font-weight: 800;
+}
+
+.toggle-control {
+  align-items: center;
+  background: #e7efec;
+  color: var(--brand-dark);
+  display: inline-flex;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 12px;
+}
+
+.toggle-control input {
+  min-height: auto;
 }
 
 .quick-actions {
@@ -237,12 +295,36 @@ main {
   gap: 10px;
 }
 
+.toolbar-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.toolbar-actions button {
+  background: var(--ink);
+  color: white;
+  font-weight: 800;
+}
+
 .notice {
   background: #fff7ed;
   border: 1px solid #fed7aa;
   color: #7c2d12;
   margin-bottom: 16px;
   padding: 13px 15px;
+}
+
+.notice[data-type="success"] {
+  background: #ecfdf5;
+  border-color: #bbf7d0;
+  color: #14532d;
+}
+
+.notice[data-type="warning"] {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #7c2d12;
 }
 
 .app-layout {
@@ -267,6 +349,7 @@ main {
 .card {
   display: grid;
   gap: 14px;
+  min-height: 198px;
   padding: 16px;
 }
 
@@ -334,6 +417,30 @@ main {
   color: white;
 }
 
+.empty-card {
+  grid-column: 1 / -1;
+}
+
+.skeleton-card {
+  pointer-events: none;
+}
+
+.skeleton-line {
+  animation: pulse 1.2s ease-in-out infinite;
+  background: #dfe7e4;
+  height: 16px;
+  width: 72%;
+}
+
+.skeleton-line.wide {
+  height: 24px;
+  width: 92%;
+}
+
+.skeleton-line.short {
+  width: 42%;
+}
+
 .details-panel {
   position: sticky;
   top: 18px;
@@ -382,6 +489,13 @@ main {
   background: var(--accent);
 }
 
+.status-note {
+  background: #eef5f3;
+  border-left: 4px solid var(--brand);
+  margin: 0;
+  padding: 12px;
+}
+
 .info-grid {
   display: grid;
   gap: 10px;
@@ -418,6 +532,11 @@ main {
   background: #f8faf9;
   border: 1px solid var(--line);
   padding: 10px 12px;
+}
+
+.date-item.active-date {
+  border-color: var(--closed);
+  box-shadow: inset 4px 0 0 var(--closed);
 }
 
 .date-item strong,
@@ -467,13 +586,15 @@ main {
 
   .top-bar,
   .toolbar,
+  .toolbar-actions,
   .search-row {
     align-items: stretch;
     flex-direction: column;
   }
 
   .top-bar,
-  .toolbar {
+  .toolbar,
+  .toolbar-actions {
     display: flex;
   }
 
@@ -491,7 +612,24 @@ main {
     display: flex;
   }
 
+  .demo-controls {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
   h1 {
     font-size: 2.7rem;
+  }
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
   }
 }
