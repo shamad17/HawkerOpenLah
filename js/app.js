@@ -1,4 +1,4 @@
-// Hawker Open or Not
+// Hawker Open Lah
 // This file controls the whole interactive experience:
 // 1. Load official Data.gov.sg hawker closure data.
 // 2. Convert raw API records into cleaner JavaScript objects.
@@ -7,7 +7,6 @@
 const DATASET_ID = "d_bda4baa634dd1cc7a6c7cad5f19e2d68";
 const API_URL = `https://data.gov.sg/api/action/datastore_search?resource_id=${DATASET_ID}&limit=500`;
 const FAVOURITES_KEY = "hawker-open-or-not-favourites";
-const LARGE_TEXT_KEY = "hawker-open-or-not-large-text";
 const SOON_DAYS = 14;
 const FALLBACK_IMAGE_URL = "https://www.nea.gov.sg/images/default-source/hawker-centres-division/amoy-street-food-centre.jpg";
 
@@ -65,7 +64,6 @@ const elements = {
   searchInput: document.querySelector("#searchInput"),
   dateInput: document.querySelector("#dateInput"),
   resetDateButton: document.querySelector("#resetDateButton"),
-  largeTextToggle: document.querySelector("#largeTextToggle"),
   retryButton: document.querySelector("#retryButton"),
   chips: document.querySelectorAll(".chip"),
   sortSelect: document.querySelector("#sortSelect"),
@@ -88,16 +86,13 @@ const state = {
   isLoading: true,
   dataSource: "api",
   viewDate: startOfDay(new Date()),
-  favourites: loadFavourites(),
-  largeText: localStorage.getItem(LARGE_TEXT_KEY) === "true"
+  favourites: loadFavourites()
 };
 
 document.addEventListener("DOMContentLoaded", init);
 
 async function init() {
   elements.dateInput.value = toDateInputValue(state.viewDate);
-  elements.largeTextToggle.checked = state.largeText;
-  document.body.classList.toggle("large-text", state.largeText);
 
   bindEvents();
   renderLoading();
@@ -135,12 +130,6 @@ function bindEvents() {
     rebuildHawkers();
     showNotice("Date reset to today.", "success");
     render();
-  });
-
-  elements.largeTextToggle.addEventListener("change", () => {
-    state.largeText = elements.largeTextToggle.checked;
-    document.body.classList.toggle("large-text", state.largeText);
-    localStorage.setItem(LARGE_TEXT_KEY, String(state.largeText));
   });
 
   elements.retryButton.addEventListener("click", async () => {
@@ -332,8 +321,9 @@ function renderResults(hawkers) {
         <span>${hawker.foodStalls} food stalls / ${hawker.marketStalls} market stalls</span>
       </p>
       <div class="card-actions">
-        <button type="button" class="primary" data-select-id="${escapeAttribute(hawker.id)}">View details</button>
+        <button type="button" class="primary" data-select-id="${escapeAttribute(hawker.id)}"><span aria-hidden="true">→</span> View details</button>
         <button type="button" data-favourite-id="${escapeAttribute(hawker.id)}">
+          <span aria-hidden="true">${state.favourites.includes(hawker.id) ? "★" : "☆"}</span>
           ${state.favourites.includes(hawker.id) ? "Saved" : "Save"}
         </button>
       </div>
@@ -381,8 +371,9 @@ function renderDetails() {
       <p class="status-note">${escapeHtml(getStatusExplanation(hawker))}</p>
 
       <div class="details-actions">
-        <a href="${mapUrl}" target="_blank" rel="noreferrer">Open map</a>
+        <a href="${mapUrl}" target="_blank" rel="noreferrer"><span aria-hidden="true">↗</span> Open map</a>
         <button type="button" id="detailFavouriteButton">
+          <span aria-hidden="true">${state.favourites.includes(hawker.id) ? "★" : "☆"}</span>
           ${state.favourites.includes(hawker.id) ? "Remove saved" : "Save favourite"}
         </button>
       </div>

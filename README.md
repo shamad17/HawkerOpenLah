@@ -1,6 +1,6 @@
-# Hawker Open or Not
+# Hawker Open Lah
 
-Hawker Open or Not is a Singapore-focused web application that helps users check whether a hawker centre is open, closing soon, or closed for cleaning.
+Hawker Open Lah is a Singapore-focused web application that helps users check whether a hawker centre is open, closing soon, or closed for cleaning.
 
 The app uses official hawker centre cleaning closure data from Data.gov.sg and turns it into a simple, searchable interface. Instead of users manually reading a long government dataset, they can quickly search for a hawker centre, check its closure status for a selected date, save favourites, and find nearby open alternatives.
 
@@ -8,13 +8,13 @@ The app uses official hawker centre cleaning closure data from Data.gov.sg and t
 
 Digital Inclusion / Daily Life Convenience
 
-This project supports digital inclusion because public data can be difficult to read when it is shown as a raw dataset. Hawker Open or Not makes the data easier for everyday users such as students, working adults, elderly residents, families, and tourists. The app is especially useful for people who want to avoid wasted trips to hawker centres during scheduled cleaning closures.
+This project supports digital inclusion because public data can be difficult to read when it is shown as a raw dataset. Hawker Open Lah makes the data easier for everyday users such as students, working adults, elderly residents, families, and tourists. The app is especially useful for people who want to avoid wasted trips to hawker centres during scheduled cleaning closures.
 
 ## Problem Statement
 
 Hawker centres are important everyday places in Singapore, but they sometimes close for cleaning. The closure information exists online, but it is not always convenient to search or understand quickly. A user may only want to know one simple thing: "Can I go there today?"
 
-Hawker Open or Not solves this by showing clear status labels:
+Hawker Open Lah solves this by showing clear status labels:
 
 - Open today
 - Closing soon
@@ -41,7 +41,7 @@ The app also allows users to choose a different date, which makes it useful for 
 - Reload the live API data
 - Open a hawker centre in Google Maps
 - View nearby open alternatives using latitude and longitude
-- Use larger text mode for better accessibility
+- Use icon buttons and strong typography to make actions easier to scan
 - Show loading, success, warning, empty, and fallback states
 - Use fallback sample data if the live API cannot be loaded
 
@@ -85,7 +85,6 @@ The HTML file defines the structure of the app:
 - Header and hero section
 - Search form
 - Date selector
-- Larger text toggle
 - Status summary cards
 - Sort and reload controls
 - Results grid
@@ -104,7 +103,7 @@ The CSS file controls the visual design and responsive layout:
 - Adds focus styles for keyboard accessibility
 - Adds loading skeleton animation
 - Adds responsive layouts for tablet and mobile screens
-- Adds `.large-text` mode for accessibility
+- Uses a refreshed colour palette and stronger typography
 
 The design uses high-contrast status colours:
 
@@ -138,7 +137,6 @@ Main parts of the script:
    - selected date
    - favourites
    - loading state
-   - larger text setting
 
 4. **API Loading**
 
@@ -170,7 +168,7 @@ Main parts of the script:
 
 10. **Safety and Accessibility**
 
-   API text is escaped before being rendered into the page. This prevents accidental HTML injection. The app also includes focus styles, status messages, large text mode, and clear empty/error states.
+   API text is escaped before being rendered into the page. This prevents accidental HTML injection. The app also includes focus styles, status messages, icon buttons, and clear empty/error states.
 
 ## File Structure
 
@@ -208,7 +206,7 @@ http://localhost:8000
 6. Show closure dates and nearby alternatives.
 7. Save it as a favourite.
 8. Switch to the `Favourites` filter.
-9. Turn on larger text mode to explain the accessibility feature.
+9. Point out the icon buttons and status colours to explain the visual design choices.
 
 ## Testing Plan
 
@@ -222,7 +220,7 @@ http://localhost:8000
 | Details panel | Click `View details` | Closure dates, address, stall count, image, and alternatives appear |
 | Favourites | Click `Save`, then `Favourites` | Saved centre appears in favourites |
 | Sort | Change sort option | Results reorder based on selected sort |
-| Larger text | Turn on larger text mode | Text becomes larger and remains readable |
+| Icon buttons | Check search, reload, save, details, and map actions | Buttons show clear icons together with text labels |
 | API fallback | Test with network unavailable | Sample data appears with a warning notice |
 | Responsive layout | Resize browser to mobile width | Layout stacks cleanly and remains usable |
 | Keyboard access | Tab through buttons and inputs | Focus outline appears clearly |
@@ -233,7 +231,7 @@ The interface is designed to be direct and task-focused. Users usually arrive wi
 
 The status cards give a quick overview of how many centres are open, closing soon, or closed. The details panel gives deeper information only after the user selects a hawker centre, which keeps the main results list easier to scan.
 
-Larger text mode was added to support users who may find small text difficult to read, especially elderly users. The app also uses clear colour-coded labels and text labels together, so users do not need to rely only on colour.
+The updated typography makes the page easier to scan, while icon buttons make common actions such as searching, saving favourites, reloading the API, and opening maps feel clearer. The app also uses clear colour-coded labels and text labels together, so users do not need to rely only on colour.
 
 ## Limitations
 

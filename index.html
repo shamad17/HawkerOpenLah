@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hawker Open or Not</title>
+    <title>Hawker Open Lah</title>
     <link rel="preconnect" href="https://data.gov.sg">
     <link rel="stylesheet" href="css/styles.css">
     <script src="js/app.js" defer></script>
@@ -13,9 +13,9 @@
 <body>
     <header class="app-header">
         <nav class="top-bar" aria-label="Main navigation">
-            <a class="brand" href="#top" aria-label="Hawker Open or Not home">
+            <a class="brand" href="#top" aria-label="Hawker Open Lah home">
                 <span class="brand-mark">H</span>
-                <span>Hawker Open or Not</span>
+                <span>Hawker Open Lah</span>
             </a>
             <a class="data-link" href="https://data.gov.sg/datasets/d_bda4baa634dd1cc7a6c7cad5f19e2d68/view"
                 target="_blank" rel="noreferrer">
@@ -38,25 +38,22 @@
                 <div class="search-row">
                     <input type="search" id="searchInput" placeholder="Try Adam Road, Amoy Street, Bedok..."
                         autocomplete="off">
-                    <button type="submit">Search</button>
+                    <button type="submit"><span aria-hidden="true">⌕</span> Search</button>
                 </div>
-                <div class="demo-controls" aria-label="Demo and accessibility controls">
+                <div class="demo-controls" aria-label="Demo date controls">
                     <label for="dateInput">
                         Check date
                         <input type="date" id="dateInput">
                     </label>
-                    <button type="button" id="resetDateButton">Today</button>
-                    <label class="toggle-control" for="largeTextToggle">
-                        <input type="checkbox" id="largeTextToggle">
-                        Larger text
-                    </label>
+                    <button type="button" id="resetDateButton"><span aria-hidden="true">↺</span> Today</button>
                 </div>
                 <div class="quick-actions" aria-label="Filter hawker centres">
                     <button type="button" class="chip active" data-filter="all">All</button>
                     <button type="button" class="chip" data-filter="open">Open today</button>
                     <button type="button" class="chip" data-filter="soon">Closing soon</button>
                     <button type="button" class="chip" data-filter="closed">Closed today</button>
-                    <button type="button" class="chip" data-filter="favourites">Favourites</button>
+                    <button type="button" class="chip" data-filter="favourites"><span aria-hidden="true">★</span>
+                        Favourites</button>
                 </div>
             </form>
         </section>
@@ -85,7 +82,7 @@
         <section class="toolbar" aria-label="Results tools">
             <p id="resultSummary">Loading hawker centre data...</p>
             <div class="toolbar-actions">
-                <button type="button" id="retryButton">Reload API</button>
+                <button type="button" id="retryButton"><span aria-hidden="true">↻</span> Reload API</button>
                 <label for="sortSelect">
                     Sort
                     <select id="sortSelect">
