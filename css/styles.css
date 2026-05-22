@@ -822,7 +822,6 @@ main {
 }
 
 @media (max-width: 920px) {
-
   .hero,
   .app-layout {
     grid-template-columns: 1fr;
@@ -911,7 +910,6 @@ main {
 }
 
 @keyframes pulse {
-
   0%,
   100% {
     opacity: 0.55;

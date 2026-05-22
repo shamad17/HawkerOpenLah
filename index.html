@@ -1,153 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hawker Open Lah</title>
-    <link rel="preconnect" href="https://data.gov.sg">
-    <link rel="stylesheet" href="css/styles.css">
-    <script src="js/app.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hawker Open Lah</title>
+  <link rel="preconnect" href="https://data.gov.sg">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/app.js" defer></script>
 </head>
-
 <body>
-    <header class="app-header">
-        <nav class="top-bar" aria-label="Main navigation">
-            <a class="brand" href="#top" aria-label="Hawker Open Lah home">
-                <span class="brand-mark">H</span>
-                <span>Hawker Open Lah</span>
-            </a>
-            <a class="data-link" href="https://data.gov.sg/datasets/d_bda4baa634dd1cc7a6c7cad5f19e2d68/view"
-                target="_blank" rel="noreferrer">
-                Data.gov.sg
-            </a>
-        </nav>
+  <header class="app-header">
+    <nav class="top-bar" aria-label="Main navigation">
+      <a class="brand" href="#top" aria-label="Hawker Open Lah home">
+        <span class="brand-mark">H</span>
+        <span>Hawker Open Lah</span>
+      </a>
+      <a class="data-link" href="https://data.gov.sg/datasets/d_bda4baa634dd1cc7a6c7cad5f19e2d68/view" target="_blank" rel="noreferrer">
+        Data.gov.sg
+      </a>
+    </nav>
 
-        <section class="hero" id="top">
-            <div class="hero-copy">
-                <p class="eyebrow">Singapore hawker centre cleaning checker</p>
-                <h1>Check before you go makan.</h1>
-                <p>
-                    Search official NEA closure dates from Data.gov.sg and see whether your favourite
-                    hawker centre is open today, closing soon, or closed for cleaning.
-                </p>
-            </div>
-
-            <div class="hawker-illustration" aria-hidden="true">
-                <div class="sun-disc"></div>
-                <div class="stall-roof">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-                <div class="stall-body">
-                    <div class="stall-sign">OPEN LAH</div>
-                    <div class="stall-window">
-                        <div class="steam steam-one"></div>
-                        <div class="steam steam-two"></div>
-                        <div class="bowl">
-                            <span></span>
-                        </div>
-                    </div>
-                    <div class="stall-counter">
-                        <span class="kopi-cup"></span>
-                        <span class="plate"></span>
-                        <span class="packet"></span>
-                    </div>
-                </div>
-                <div class="illustration-floor">
-                    <span class="table"></span>
-                    <span class="stool stool-one"></span>
-                    <span class="stool stool-two"></span>
-                </div>
-            </div>
-
-            <form class="search-panel" id="searchForm">
-                <label for="searchInput">Find a hawker centre</label>
-                <div class="search-row">
-                    <input type="search" id="searchInput" placeholder="Try Adam Road, Amoy Street, Bedok..."
-                        autocomplete="off">
-                    <button type="submit"><span aria-hidden="true">⌕</span> Search</button>
-                </div>
-                <div class="demo-controls" aria-label="Demo date controls">
-                    <label for="dateInput">
-                        Check date
-                        <input type="date" id="dateInput">
-                    </label>
-                    <button type="button" id="resetDateButton"><span aria-hidden="true">↺</span> Today</button>
-                </div>
-                <div class="quick-actions" aria-label="Filter hawker centres">
-                    <button type="button" class="chip active" data-filter="all">All</button>
-                    <button type="button" class="chip" data-filter="open">Open today</button>
-                    <button type="button" class="chip" data-filter="soon">Closing soon</button>
-                    <button type="button" class="chip" data-filter="closed">Closed today</button>
-                    <button type="button" class="chip" data-filter="favourites"><span aria-hidden="true">★</span>
-                        Favourites</button>
-                </div>
-            </form>
-        </section>
-    </header>
-
-    <main>
-        <section class="status-strip" aria-label="Summary">
-            <article>
-                <span class="stat-icon" aria-hidden="true">◷</span>
-                <span id="todayLabel">Today</span>
-                <strong id="todayDate">Loading...</strong>
-            </article>
-            <article>
-                <span class="stat-icon" aria-hidden="true">✓</span>
-                <span>Open today</span>
-                <strong id="openCount">0</strong>
-            </article>
-            <article>
-                <span class="stat-icon" aria-hidden="true">!</span>
-                <span>Closing soon</span>
-                <strong id="soonCount">0</strong>
-            </article>
-            <article>
-                <span class="stat-icon" aria-hidden="true">×</span>
-                <span>Closed today</span>
-                <strong id="closedCount">0</strong>
-            </article>
-        </section>
-
-        <section class="toolbar" aria-label="Results tools">
-            <p id="resultSummary">Loading hawker centre data...</p>
-            <div class="toolbar-actions">
-                <button type="button" id="retryButton"><span aria-hidden="true">↻</span> Reload API</button>
-                <label for="sortSelect">
-                    Sort
-                    <select id="sortSelect">
-                        <option value="name">Name A-Z</option>
-                        <option value="nextClosure">Next closure</option>
-                        <option value="foodStalls">Most food stalls</option>
-                    </select>
-                </label>
-            </div>
-        </section>
-
-        <div class="notice" id="notice" role="status" hidden></div>
-
-        <section class="app-layout">
-            <section class="results-grid" id="resultsGrid" aria-label="Hawker centre results"></section>
-
-            <aside class="details-panel" id="detailsPanel" aria-label="Selected hawker centre details">
-                <div class="empty-state">
-                    <h2>Pick a hawker centre</h2>
-                    <p>Choose any result to view cleaning dates, address, stall count, and nearby alternatives.</p>
-                </div>
-            </aside>
-        </section>
-    </main>
-
-    <footer class="site-footer">
+    <section class="hero" id="top">
+      <div class="hero-copy">
+        <p class="eyebrow">Singapore hawker centre cleaning checker</p>
+        <h1>Check before you go makan.</h1>
         <p>
-            Built with HTML, CSS, JavaScript, and the NEA Dates of Hawker Centres Closure dataset from
-            <a href="https://data.gov.sg/" target="_blank" rel="noreferrer">Data.gov.sg</a>.
+          Search official NEA closure dates from Data.gov.sg and see whether your favourite
+          hawker centre is open today, closing soon, or closed for cleaning.
         </p>
-    </footer>
-</body>
+      </div>
 
+      <div class="hawker-illustration" aria-hidden="true">
+        <div class="sun-disc"></div>
+        <div class="stall-roof">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div class="stall-body">
+          <div class="stall-sign">OPEN LAH</div>
+          <div class="stall-window">
+            <div class="steam steam-one"></div>
+            <div class="steam steam-two"></div>
+            <div class="bowl">
+              <span></span>
+            </div>
+          </div>
+          <div class="stall-counter">
+            <span class="kopi-cup"></span>
+            <span class="plate"></span>
+            <span class="packet"></span>
+          </div>
+        </div>
+        <div class="illustration-floor">
+          <span class="table"></span>
+          <span class="stool stool-one"></span>
+          <span class="stool stool-two"></span>
+        </div>
+      </div>
+
+      <form class="search-panel" id="searchForm">
+        <label for="searchInput">Find a hawker centre</label>
+        <div class="search-row">
+          <input
+            type="search"
+            id="searchInput"
+            placeholder="Try Adam Road, Amoy Street, Bedok..."
+            autocomplete="off"
+          >
+          <button type="submit"><span aria-hidden="true">⌕</span> Search</button>
+        </div>
+        <div class="demo-controls" aria-label="Demo date controls">
+          <label for="dateInput">
+            Check date
+            <input type="date" id="dateInput">
+          </label>
+          <button type="button" id="resetDateButton"><span aria-hidden="true">↺</span> Today</button>
+        </div>
+        <div class="quick-actions" aria-label="Filter hawker centres">
+          <button type="button" class="chip active" data-filter="all">All</button>
+          <button type="button" class="chip" data-filter="open">Open today</button>
+          <button type="button" class="chip" data-filter="soon">Closing soon</button>
+          <button type="button" class="chip" data-filter="closed">Closed today</button>
+          <button type="button" class="chip" data-filter="favourites"><span aria-hidden="true">★</span> Favourites</button>
+        </div>
+      </form>
+    </section>
+  </header>
+
+  <main>
+    <section class="status-strip" aria-label="Summary">
+      <article>
+        <span class="stat-icon" aria-hidden="true">◷</span>
+        <span id="todayLabel">Today</span>
+        <strong id="todayDate">Loading...</strong>
+      </article>
+      <article>
+        <span class="stat-icon" aria-hidden="true">✓</span>
+        <span>Open today</span>
+        <strong id="openCount">0</strong>
+      </article>
+      <article>
+        <span class="stat-icon" aria-hidden="true">!</span>
+        <span>Closing soon</span>
+        <strong id="soonCount">0</strong>
+      </article>
+      <article>
+        <span class="stat-icon" aria-hidden="true">×</span>
+        <span>Closed today</span>
+        <strong id="closedCount">0</strong>
+      </article>
+    </section>
+
+    <section class="toolbar" aria-label="Results tools">
+      <p id="resultSummary">Loading hawker centre data...</p>
+      <div class="toolbar-actions">
+        <button type="button" id="retryButton"><span aria-hidden="true">↻</span> Reload API</button>
+        <label for="sortSelect">
+          Sort
+          <select id="sortSelect">
+            <option value="name">Name A-Z</option>
+            <option value="nextClosure">Next closure</option>
+            <option value="foodStalls">Most food stalls</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <div class="notice" id="notice" role="status" hidden></div>
+
+    <section class="app-layout">
+      <section class="results-grid" id="resultsGrid" aria-label="Hawker centre results"></section>
+
+      <aside class="details-panel" id="detailsPanel" aria-label="Selected hawker centre details">
+        <div class="empty-state">
+          <h2>Pick a hawker centre</h2>
+          <p>Choose any result to view cleaning dates, address, stall count, and nearby alternatives.</p>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>
+      Built with HTML, CSS, JavaScript, and the NEA Dates of Hawker Centres Closure dataset from
+      <a href="https://data.gov.sg/" target="_blank" rel="noreferrer">Data.gov.sg</a>.
+    </p>
+  </footer>
+</body>
 </html>
