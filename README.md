@@ -43,6 +43,7 @@ The app also allows users to choose a different date, which makes it useful for 
 - View nearby open alternatives using latitude and longitude
 - Use icon buttons and strong typography to make actions easier to scan
 - Use an original CSS logo mark to give the app a stronger visual identity
+- Use an original CSS food-pattern background instead of relying on a stock/photo background
 - Show loading, success, warning, empty, and fallback states
 - Use fallback sample data if the live API cannot be loaded
 
@@ -106,6 +107,7 @@ The CSS file controls the visual design and responsive layout:
 - Adds responsive layouts for tablet and mobile screens
 - Uses a refreshed colour palette and stronger typography
 - Builds the hawker-style logo mark using HTML elements and CSS shapes
+- Builds a subtle food-pattern background using CSS gradients and simple shapes
 
 The design uses high-contrast status colours:
 
